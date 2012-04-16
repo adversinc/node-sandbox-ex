@@ -1,11 +1,10 @@
 {
-  "name": "TODO",
+  "name": "node-sandbox",
   "version": "0.1",
-  "description": "Advanced sandboxing library that allows communication between the sandbox and the parent process",
+  "description": "Advanced sandboxing library that allows communication between the sandbox and the parent process.",
   "keywords": ["sandbox", "library", "child_process"],
-  "repository": "git://github.com/hflw/TODO",
+  "repository": "git://github.com/hflw/node-sandbox.git",
   "author": "Will Riley <will@hflw.org> (http://hflw.org/)",
-  "repository": "TODO",
   "dependencies": {
   },
   "devDependencies": {
