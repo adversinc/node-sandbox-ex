@@ -11,7 +11,8 @@ Documentation
 -------------
 The library is still unfinished, but you can expect the API to be something like this:
 
-```//create a new sandbox instance that allows you to require()
+```javascript
+//create a new sandbox instance that allows you to require()
 //crypto or ./someModule (relative to the .js file being run)
 var s = new Sandbox("./path/to/code.js", {
     allow: ["crypto", "./someModule"]
@@ -32,7 +33,6 @@ s.once("ready", function(){
 //run the sandbox
 s.run();
 ```
-
 License
 -------
 This library is Licensed under the Academic Free License version 2.1
