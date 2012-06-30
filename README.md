@@ -58,7 +58,7 @@ If your node command isn't in your `PATH`, you need to specify it manually. By d
 If for some reason `Sandbox` isn't detecting the path to `shovel.js`, you can specify the path manually (it's in `node-sandbox/lib/shovel.js`)
 
 ```javascript
-var sb = new Sandbox("path/to/code.js, {
+var sb = new Sandbox("path/to/code.js", {
     
     //the node command used to spawn the child process
     node_command: "node"
