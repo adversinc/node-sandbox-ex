@@ -274,8 +274,12 @@ To get a stream to the sandbox from within the main process, use `Sandbox.getStr
 var sb = new Sandbox(/* options etc */);
 sb.run();
 
-var myStream = sb.getStream();
-//pass myStream to your 3rd party lib
+//note: 'ready' is sent over the stream, so don't
+//listen on it until after the event is emitted!
+sb.on("ready", function(){
+    var myStream = sb.getStream();
+    //pass myStream to your 3rd party lib
+});
 ```
 
 The other end of the stream can be accessed from within the sandbox through the `parentStream` global variable, eg:
