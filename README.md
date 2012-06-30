@@ -48,6 +48,11 @@ sb.on("ready", function(){
 });
 ```
 
+Specifying allowed node modules
+-------------------------------
+
+Docs for this will come when the feature is complete!
+
 Exposing RPC Methods
 --------------------
 node-sandbox comes with a stock RPC library that uses JSON-RPC in a bi-directional way, so that both ends can expose methods for the other to call. We can access it through `Sandbox.rpc`.
@@ -169,7 +174,7 @@ var sb = new Sandbox("path/to/code.js", {
 });
 ```
 
-By default, `call_timeout` is -1, which disables timeouts to method calls. The value specified in `call_timeout` will also be applied to the `rpc` class inside the sandbox.
+By default, `call_timeout` is `-1`, which disables timeouts to method calls. The value specified in `call_timeout` will also be applied to the `rpc` class inside the sandbox.
 
 Detecting when the sandbox exits
 --------------------------------
@@ -226,7 +231,7 @@ sb.on("lockup", function(){
 Detecting output on STDERR
 --------------------------
 
-If something ever goes on within the sandbox, by default it doesn't get printed to the main process' STDOUT. Instead, you need to listen on the `stderr` event and do it yourself, eg:
+If something ever goes wrong within the sandbox, by default it doesn't get printed to the main process' `STDOUT`. Instead, you need to listen on the `stderr` event and do it yourself, eg:
 
 ```javascript
 sb.on("stderr", function(text){
@@ -238,7 +243,7 @@ You can also pass this on to any logging library you use.
 
 Using your own RPC/inter-process communication
 ----------------------------------------------
-node-sandbox works with any RPC or communication library that uses node's `Stream` API. The `Stream` used is created using the child process' STDOUT and STDIN.
+node-sandbox works with any RPC or communication library that uses node's `Stream` API. The `Stream` node-sandbox gives you is created using the child process' `STDOUT` and `STDIN` for security reasons.
 
 To get a stream to the sandbox from within the main process, use `Sandbox.getStream()`, eg:
 
@@ -256,6 +261,8 @@ The other end of the stream can be accessed from within the sandbox through the 
 var myStream = parentStream;
 //pass myStream to your 3rd party lib
 ```
+
+Note that if you use your own library, node-sandbox's built-in lockup detection will still read from and write to the stream! Set the `ping_interval` option to `-1` to disable it. See "Lockup detection & killing the sandbox" for more detail.
 
 Pinging the Sandbox
 -------------------
