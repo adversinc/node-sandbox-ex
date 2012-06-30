@@ -304,3 +304,24 @@ sb.ping().then(function(time){
 });
 ```
 
+Customized shovel.js and replacing modules
+------------------------------------------
+
+In some cases, you might want to do extra bootstrapping inside of the sandbox, or you might want to wrap a module returned by `require()`. For example, you might want to use something like [nodejs-sandboxed-fs](https://github.com/augustl/nodejs-sandboxed-fs) to replace node's `fs` module with a wrapped one. In cases like this, you'll need to use a custom `shovel.js` file.
+
+(Note: I may add an easier way to do module replacement in the future, but for now, this is the easiest way.)
+
+You can specify the path to a custom `shovel.js` by using the `shovel` option on `Sandbox` (see "Basic Usage" above.)
+
+Inside of `shovel.js` (it's in the `lib/` folder), node-sandbox sets up RPC, wraps `require()`, and executes the file passed to it (in that order). 
+
+If you want, you can bootstrap your own RPC class in a custom `shovel.js`, but it isn't nessesary. It's important to note though, that the `Sandbox` class' `ready` event is emitted due to a response over the stream, so you might want to keep node-sandbox's RPC classes in there (they won't send things over the wire unless you call methods).
+
+To replace modules, we need to pass some extra params to `requireFactory`. `requireFactory` will wrap `require()` so that it can only load the allowed modules. If we pass it some extra options, we can replace whole modules with certain objects.
+
+
+```javascript
+//TODO: example (this feature isn't 100% finished yet)
+```
+
+So, load the native modules before `require()` is wrapped, wrap them using whatever library you want, and then pass them as options to `requireFactory`. Be extremely careful that the native module doesn't get leaked to the global scope by using `var`!
