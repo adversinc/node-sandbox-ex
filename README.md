@@ -311,11 +311,11 @@ In some cases, you might want to do extra bootstrapping inside of the sandbox, o
 
 (Note: I may add an easier way to do module replacement in the future, but for now, this is the easiest way.)
 
-You can specify the path to a custom `shovel.js` by using the `shovel` option on `Sandbox` (see "Basic Usage" above.)
+You can specify the path to a custom `shovel.js` by using the `shovel` option on `Sandbox` (see "Basic Usage" above.) 
 
-Inside of `shovel.js` (it's in the `lib/` folder), node-sandbox sets up RPC, wraps `require()`, and executes the file passed to it (in that order). 
+Inside of `shovel.js` (it's in the `lib/` folder), node-sandbox sets up RPC, wraps `require()`, and executes the file passed to it (in that order). Feel free to use the `shovel.js` node-sandbox provides as a template for your custom one.
 
-If you want, you can bootstrap your own RPC class in a custom `shovel.js`, but it isn't nessesary. It's important to note though, that the `Sandbox` class' `ready` event is emitted due to a response over the stream, so you might want to keep node-sandbox's RPC classes in there (they won't send things over the wire unless you call methods).
+If you want, you can bootstrap your own RPC class here, but it isn't nessesary. It's important to note though, that the `Sandbox` class' `ready` event is emitted due to a response over the stream, so you might want to keep node-sandbox's RPC classes in there (they won't send things over the wire after `ready` is emitted unless you call methods).
 
 To replace modules, we need to pass some extra params to `requireFactory`. `requireFactory` will wrap `require()` so that it can only load the allowed modules. If we pass it some extra options, we can replace whole modules with certain objects.
 
@@ -324,4 +324,4 @@ To replace modules, we need to pass some extra params to `requireFactory`. `requ
 //TODO: example (this feature isn't 100% finished yet)
 ```
 
-So, load the native modules before `require()` is wrapped, wrap them using whatever library you want, and then pass them as options to `requireFactory`. Be extremely careful that the native module doesn't get leaked to the global scope by using `var`!
+So, load the native modules before `require()` is wrapped, wrap them using whatever code you want, and then pass them as options to `requireFactory`. Be extremely careful that the native module doesn't get leaked to the global scope by using `var`!
