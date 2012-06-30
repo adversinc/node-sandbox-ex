@@ -42,7 +42,7 @@ sb.run();
 //otherwise we'll get an error!
 sb.on("ready", function(){
     //call a method exposed by the sandbox
-    s.rpc.call("someMethod", ["someArg"]).then(function(result){
+    sb.rpc.call("someMethod", ["someArg"]).then(function(result){
         console.log(result);
     });
 });
