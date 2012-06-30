@@ -48,6 +48,29 @@ sb.on("ready", function(){
 });
 ```
 
+Basic options
+-------------
+
+There are some basic options you should know about for fringe cases.
+
+If your node command isn't in your `PATH`, you need to specify it manually. By default, it just uses `node`.
+
+If for some reason `Sandbox` isn't detecting the path to `shovel.js`, you can specify the path manually (it's in `node-sandbox/lib/shovel.js`)
+
+```javascript
+var sb = new Sandbox("path/to/code.js, {
+    
+    //the node command used to spawn the child process
+    node_command: "node"
+
+    //the path to the shovel (what bootstraps the child process)
+    shovel: path.join(__dirname, "shovel.js"),
+
+});
+```
+
+Other options are discussed in the relevant sections!
+
 Specifying allowed node modules
 -------------------------------
 
