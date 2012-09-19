@@ -3,11 +3,11 @@ node-sandbox
 
 About
 -----
-node-sandbox is a safe way of running untrusted code outside of your application's node process. You can interface with code running in the sandbox via RPC (or any library that works over the node `Stream` API).
+node-sandbox is a way of running untrusted code outside of your application's node process. You can interface with code running in the sandbox via RPC (or any library that works over the node `Stream` API).
 
-You can specify which modules the sandbox can `require()`, or you can disable `require()` altogether. Just be sure something like `net.Socket` isn't accessible via the modules you import!
+Note that at the moment, the only protection is that the code is run in a separate process, and that the process is prevented from loading certain C bindings used by core modules. In the future, there will be container plugins available to block off functionality to the process itself (eg FS access, ability to open sockets, etc.) Containment will be done on the OS-level to reduce the attack surface of the sandbox.
 
-NOTE: this library is still unfinished! It will be functional very soon!
+Note that the method of containment used by the sandbox is far from bulletproof, and there is a very real possibility that malicious code could break out of the sandbox. In the future we will be working on improving it, but it will never be perfect.
 
 License
 -------
@@ -15,19 +15,15 @@ This library is Licensed under the Academic Free License version 2.1
 
 Documentation
 =============
-NOTE: this library is still unfinished! It will be functional very soon!
 
-Using node-sandbox is pretty straightforward. The source code is fairly well documented, so if you have any questions, feel free to dive in!
+Using node-sandbox is pretty straightforward. The source code is fairly well documented, and there a good number of test cases, so if you have any questions, feel free to dive in!
 
 Basic Usage
 -----------
 
 ```javascript
-//create a new sandbox instance that allows you to require()
-//crypto or ./someModule (relative to the .js file being run)
-var sb = new Sandbox("./path/to/code.js", {
-    permissions: ["crypto", "./someModule"]
-});
+//create a new sandbox instance w/ default options
+var sb = new Sandbox("./path/to/code.js");
 
 //expose a method for the sandbox to call
 sb.rpc.expose("someMethod", function(arg){
@@ -71,10 +67,22 @@ var sb = new Sandbox("path/to/code.js", {
 
 Other options are discussed in the relevant sections!
 
-Specifying allowed node modules
--------------------------------
+Specifying Permissions
+----------------------
 
-Docs for this will come when the feature is complete!
+Specifying permissions is somewhat complicated. In node, there's a function called `process.binding()` that's used by node's built-in modules to get the relevant C bindings for things like I/O, crypto, and others. `process.binding()` works like `require()` does; you pass a module as an argument, and it fetches the relevant C binding.
+
+node-sandbox's permissions system will block off loading of the C bindings. To allow loading of them, we need to pass a `permissions` option to it, specifying which C bindings are allowed to be loaded.
+
+The following are the permissions specified by default, and are needed for the sandbox to run.
+
+```javascript
+var sb = new Sandbox("./path/to/code.js", {
+    permissions: ["tty_wrap", "pipe_wrap"]
+});
+```
+
+If you want to allow use of specific modules (eg `fs` or `crypto`), look at their file in [node's `lib/` directory](https://github.com/joyent/node/tree/master/lib), and see what bindings they load by searching for `process.binding`. Then pass any modules needed through `permissions` array.
 
 Exposing RPC Methods
 --------------------
@@ -264,33 +272,6 @@ sb.on("stderr", function(text){
 
 You can also pass this on to any logging library you use.
 
-Using your own RPC/inter-process communication
-----------------------------------------------
-node-sandbox works with any RPC or communication library that uses node's `Stream` API. The `Stream` node-sandbox gives you is created using the child process' `STDOUT` and `STDIN` for security reasons.
-
-To get a stream to the sandbox from within the main process, use `Sandbox.getStream()`, eg:
-
-```javascript
-var sb = new Sandbox(/* options etc */);
-sb.run();
-
-//note: 'ready' is sent over the stream, so don't
-//listen on it until after the event is emitted!
-sb.on("ready", function(){
-    var myStream = sb.getStream();
-    //pass myStream to your 3rd party lib
-});
-```
-
-The other end of the stream can be accessed from within the sandbox through the `parentStream` global variable, eg:
-
-```javascript
-var myStream = parentStream;
-//pass myStream to your 3rd party lib
-```
-
-Note that if you use your own library, node-sandbox's built-in lockup detection will still read from and write to the stream! Set the `ping_interval` option to `-1` to disable it. See "Lockup detection & killing the sandbox" for more detail.
-
 Pinging the Sandbox
 -------------------
 
@@ -303,25 +284,7 @@ sb.ping().then(function(time){
     console.log("Failed to ping sandbox!");
 });
 ```
+Plugin System
+-------------
 
-Customized shovel.js and replacing modules
-------------------------------------------
-
-In some cases, you might want to do extra bootstrapping inside of the sandbox, or you might want to wrap a module returned by `require()`. For example, you might want to use something like [nodejs-sandboxed-fs](https://github.com/augustl/nodejs-sandboxed-fs) to replace node's `fs` module with a wrapped one. In cases like this, you'll need to use a custom `shovel.js` file.
-
-(Note: I may add an easier way to do module replacement in the future, but for now, this is the easiest way.)
-
-You can specify the path to a custom `shovel.js` by using the `shovel` option on `Sandbox` (see "Basic Usage" above.) 
-
-Inside of `shovel.js` (it's in the `lib/` folder), node-sandbox sets up RPC, wraps `require()`, and executes the file passed to it (in that order). Feel free to use the `shovel.js` node-sandbox provides as a template for your custom one.
-
-If you want, you can bootstrap your own RPC class here, but it isn't nessesary. It's important to note though, that the `Sandbox` class' `ready` event is emitted due to a response over the stream, so you might want to keep node-sandbox's RPC classes in there (they won't send things over the wire after `ready` is emitted unless you call methods).
-
-To replace modules, we need to pass some extra params to `requireFactory`. `requireFactory` will wrap `require()` so that it can only load the allowed modules. If we pass it some extra options, we can replace whole modules with certain objects.
-
-
-```javascript
-//TODO: example (this feature isn't 100% finished yet)
-```
-
-So, load the native modules before `require()` is wrapped, wrap them using whatever code you want, and then pass them as options to `requireFactory`. Be extremely careful that the native module doesn't get leaked to the global scope by using `var`!
+This will be explained in greater depth later, but this allows you to use a custom RPC system, or wrap different functions. If you're really curious, check out the `plugins/` directory, it's fairly self-documenting.
