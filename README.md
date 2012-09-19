@@ -21,6 +21,8 @@ Using node-sandbox is pretty straightforward. The source code is fairly well doc
 Basic Usage
 -----------
 
+Note: by default, the code being run won't have access to `require()` or anything. See "Specifying Permissions" for more info.
+
 ```javascript
 //create a new sandbox instance w/ default options
 var sb = new Sandbox("./path/to/code.js");
@@ -44,7 +46,7 @@ sb.on("ready", function(){
 });
 ```
 
-Basic options
+Basic Options
 -------------
 
 There are some basic options you should know about for fringe cases.
@@ -83,6 +85,14 @@ var sb = new Sandbox("./path/to/code.js", {
 ```
 
 If you want to allow use of specific modules (eg `fs` or `crypto`), look at their file in [node's `lib/` directory](https://github.com/joyent/node/tree/master/lib), and see what bindings they load by searching for `process.binding`. Then pass any modules needed through `permissions` array.
+
+Note that if you want access to `require()`, you'll need to pass the following to permissions:
+
+```javascript
+var sb = new Sandbox("./path/to/code.js", {
+    permissions: ["tty_wrap", "pipe_wrap"] //TODO: figure these out
+});
+```
 
 Exposing RPC Methods
 --------------------
