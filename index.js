@@ -1,4 +1,4 @@
-var Sandbox = require("lib/Sandbox");
+var Sandbox = require("./lib/Sandbox");
 
 module.exports = {
     Sandbox: Sandbox
