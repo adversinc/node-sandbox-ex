@@ -294,7 +294,95 @@ sb.ping().then(function(time){
     console.log("Failed to ping sandbox!");
 });
 ```
-Plugin System
--------------
+Plugins
+-------
 
-This will be explained in greater depth later, but this allows you to use a custom RPC system, or wrap different functions. If you're really curious, check out the `plugins/` directory, it's fairly self-documenting.
+node-sandbox has a full featured plugin system, and a lot of it's features are provided by built-in plugins. Built-in plugins can be found in `lib/plugins/`, and include the following:
+
+* `_base`: not meant to be loaded, but provides base functionality to other plugins
+* `rpc`: provides JSON-RPC functionality (exposed through `Sandbox.rpc`) over the `Stream` between the parent and child processes exposed by `Sandbox`.
+* `lockup_detection`: provides lockup detection functionality, including the `on("lockup")` event. Relies on `rpc`.
+* `wrapper`: wraps `process.binding` so that any unauthorized modules aren't allowed to be loaded.
+
+Eventually I'd like to include a plugin that can set up a secure container for the child process using OS features (eg SELinux). If you know a lot about this sort of thing and would like to contribute, please let me know!
+
+Plugins can be specified using the `plugins` option:
+
+```javascript
+var sb = new Sandbox("path/to/file.js", {
+    plugins: [
+        //Note: these are the default plugins that are loaded. If you want to load an extra plugin, you should include these built-in ones too!
+        "rpc", "lockup_detection", "wrapper"
+    ]
+});
+```
+
+Note that plugin hooks are executed in the order that they're provided in the array, so make sure "wrapper" goes last, otherwise a plugin might not have access to the resources it needs to initiate itself!
+
+Some plugins in the future may take additional arguments, but all the built-in ones at the time of writing read from the main arguments passed to the sandbox (for the sake of ease-of-use). Here's an example on how to pass custom arguments to a plugin:
+
+```javascript
+var sb = new Sandbox("path/to/file.js", {
+    plugins: [
+        {
+            name: "my_plugin",
+            options: {foo: "bar"}
+        },
+        "some_other_plugin"
+    ]
+});
+```
+
+To load an external plugin, simply pass a path to the directory containing all the plugin's files (`manifest.js`, etc.) instead of a plugin name. It can either be an absolute path, or relative to the `lib/PluginManager.js` file:
+
+```javascript
+var sb = new Sandbox("path/to/file.js", {
+    plugins: [
+        {
+            name: "/path/to/my_plugin",
+            options: {foo: "bar"}
+        },
+        //OR
+        "/path/to/my_plugin"
+    ]
+});
+```
+
+Writing Custom Plugins
+----------------------
+
+The plugin system lets you hook into the sandbox and add any functionality you want. Things you can do include:
+
+* Extend the sandbox by adding custom options and methods, and pretty much override/wrap any function/variable you want
+* Run code during certain events in the parent process (eg when the child process exits, when the process writes to stderr, etc.)
+* Run code inside the child process (eg when the process spawns, after the code is loaded, after the code is executed, etc.)
+* Pass extra arguments to the child process via `startData`
+
+Using this, you can write your own RPC plugin, container plugin, or anything else you need. I strongly suggest looking in the `lib/plugins` directory for examples, especially at the `_base` plugin, which documents when each hook is called.
+
+Plugins consist of three files:
+
+* `plugin_name/manifest.js`: a manifest file that provides information about the plugin.
+* `plugin_name/ParentHooks.js`: a class that provides hooks for the parent process and allows you to hook into each `Sandbox` instance.
+* `plugin_name/ShovelHooks.js`: a class that provides hooks for `shovel.js`, which is what's run to create our child process.
+
+`ParentHooks` and `ShovelHooks` should both extend the respective classes in the `_base` plugin. `manifest.js` can simply be copied to your plugin's directory.
+
+The `PluginManager` class loads the plugins, and does some basic dependency/conflict checks. Below is the `manifest.js` file from the `_base` plugin:
+
+```javascript
+module.exports = {
+    name: "_base", //the name of the parent directory our plugin is in
+    provides: [], //features that it provides. This is flexible, so it can be something like "container" or "rpc".
+    conflicts: [], //features or specific plugins this plugin conflicts with.
+    depends: [] //features or specific plugins that this plugin requires to run.
+}
+```
+
+To put this into practice, lets say we want to write a replacement for the RPC plugin. If we put `"rpc"` in the `provides` array, the plugin manager will throw an error if any other plugins that provide the `"rpc"` functionality are loaded. This way two plugins won't fight over access to `Sandbox.rpc`.
+
+If we don't provide RPC functionality, but for one reason or the other we conflict with the RPC module (maybe our plugin wants to use the Stream exclusively), we can put it in the `conflicts` array instead.
+
+If our plugin depended on the RPC class in order to pass data between the parent and child processes, we could put `"rpc"` in the `depends` array. Note that any plugin that provides the `"rpc"` functionality would satisfy this requirement. For this reason, it's strongly suggested that any module that provides a specified functionality should have an identical base API (extra functions are allowed to be implemented).
+
+To implement subclasses of `ParentHooks` and `ShovelHooks`, take a look inside of the respective class definitions in the `_base` class. Everything is well documented in there, and will explain how to access things through member variables, and which methods get called when.
