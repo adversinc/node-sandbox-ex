@@ -381,7 +381,7 @@ module.exports = {
 
 To put this into practice, lets say we want to write a replacement for the RPC plugin. If we put `"rpc"` in the `provides` array, the plugin manager will throw an error if any other plugins that provide the `"rpc"` functionality are loaded. This way two plugins won't fight over access to `Sandbox.rpc`.
 
-If we don't provide RPC functionality, but for one reason or the other we conflict with the RPC module (maybe our plugin wants to use the Stream exclusively), we can put it in the `conflicts` array instead.
+If we don't provide RPC functionality, but for one reason or the other we conflict with the RPC module (maybe our plugin wants to use the `Stream` between parent and child processes exclusively), we can put it in the `conflicts` array instead.
 
 If our plugin depended on the RPC class in order to pass data between the parent and child processes, we could put `"rpc"` in the `depends` array. Note that any plugin that provides the `"rpc"` functionality would satisfy this requirement. For this reason, it's strongly suggested that any module that provides a specified functionality should have an identical base API (extra functions are allowed to be implemented).
 
