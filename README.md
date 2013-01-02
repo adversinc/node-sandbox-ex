@@ -13,6 +13,10 @@ License
 -------
 This library is Licensed under the Academic Free License version 2.1
 
+Installation
+------------
+To install, either download the source, or just run `npm install node-sandbox`
+
 Documentation
 =============
 
