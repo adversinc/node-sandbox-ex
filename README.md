@@ -1,5 +1,9 @@
-node-sandbox
-============
+node-sandbox-ex
+===============
+
+This is a fork of node-sandbox module made in attempt to make it a bit more secure.
+
+NOT PROVEN TO BE SECURE ENOUGH YET, use at your own risk!
 
 About
 -----
