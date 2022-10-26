@@ -231,8 +231,8 @@ Detecting when the sandbox exits
 We can detect when the sandbox exits using the `exit` event.
 
 ```javascript
-sb.on("exit", function(){
-    console.log("the sandbox ended!");
+sb.on("exit", function(exitCode, signal){
+    console.log("the sandbox ended, exit code: " + exitCode);
 });
 ```
 
