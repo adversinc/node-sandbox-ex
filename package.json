@@ -1,6 +1,6 @@
 {
   "name": "node-sandbox-ex",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Advanced sandboxing library that allows communication between the sandbox and the parent process.",
   "keywords": [
     "sandbox",
@@ -10,7 +10,7 @@
   "repository": "https://github.com/adversinc/node-sandbox",
   "author": "Glaznah Gassner <dinofabrello@slbiz2life.com>",
   "dependencies": {
-    "node-promise": "github:adversinc/node-promise",
+    "node-promise": "https://github.com/adversinc/node-promise.git",
     "underscore": "^1.13.6",
     "uuid": "^9.0.0"
   },
