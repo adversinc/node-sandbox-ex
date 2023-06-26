@@ -1,6 +1,6 @@
 {
   "name": "node-sandbox-ex",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Advanced sandboxing library that allows communication between the sandbox and the parent process.",
   "keywords": [
     "sandbox",
