@@ -349,9 +349,9 @@ nanoid@3.3.3:
   resolved "https://npm.metabizlist.com/nanoid/-/nanoid-3.3.3.tgz#fd8e8b7aa761fe807dba2d1b98fb7241bb724a25"
   integrity sha512-p1sjXuopFs0xg+fPASzQ28agW1oHD7xDsd9Xkf3T15H3c/cifrFHVwrh74PdoklAPi+i7MdRsE47vm2r6JoB+w==
 
-"node-promise@github:adversinc/node-promise":
+"node-promise@https://github.com/adversinc/node-promise.git":
   version "0.5.13"
-  resolved "https://codeload.github.com/adversinc/node-promise/tar.gz/4d053e2a58e949b79dfe2bf791461ebd7f63a5c5"
+  resolved "https://github.com/adversinc/node-promise.git#4d053e2a58e949b79dfe2bf791461ebd7f63a5c5"
 
 normalize-path@^3.0.0, normalize-path@~3.0.0:
   version "3.0.0"
